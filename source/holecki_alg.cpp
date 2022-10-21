@@ -6,18 +6,18 @@ void HolecAlg (int n, double* A, double* b, double* x, double* ExtraMem) {
   double sum = 0;
   for (int i = 0; i < n; i++) {
     for (int j = 0; j <= i; j++) {
-        sum = 0;
-        for (int k = 0; k < j; k++)
-            sum += ExtraMem[i*n + k] * ExtraMem[j*n + k];
-
-        if (i == j)
-            ExtraMem[i*n + j] = sqrt(A[i*n + i] - sum);
-        else
-            ExtraMem[i*n + j] = (1.0 / ExtraMem[j*n + j] * (A[i*n + j] - sum));
+      sum = 0;
+      for (int k = 0; k < j; k++){
+        sum += ExtraMem[i*n + k] * ExtraMem[j*n + k];
+      }
+      if (i == j)
+        ExtraMem[i*n + j] = sqrt(fabs(A[i*n + i] - sum));
+      else
+        ExtraMem[i*n + j] = (1.0 / ExtraMem[j*n + j] * (A[i*n + j] - sum));
     }
   }
-  // PrintMat(ExtraMem,n,n,n);
-  // printf("\n");
+   //PrintMat(ExtraMem,n,n,n);
+   //printf("\n");
 
 
 
