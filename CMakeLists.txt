@@ -11,7 +11,6 @@ endif ()
 include_directories(${HOLEC_INCLUDE_DIRS})
 
 add_compile_options(
-      -fsanitize=address
       -mfpmath=sse
       -fstack-protector-all
       -g
@@ -44,4 +43,4 @@ add_executable(
   source/holecki_alg.cpp
 )
 
-target_link_libraries(holec_alg ${GEOMETRY_LIBS} -fsanitize=address)
+target_link_libraries(holec_alg ${GEOMETRY_LIBS})

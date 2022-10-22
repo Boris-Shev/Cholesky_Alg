@@ -2,7 +2,7 @@
 
 using namespace std;
 
-void HolecAlg (int n, double* A, double* b, double* x, double* ExtraMem) {
+int HolecAlg (int n, double* A, double* b, double* x, double* ExtraMem) {
   double sum = 0;
   for (int i = 0; i < n; i++) {
     for (int j = 0; j <= i; j++) {
@@ -10,10 +10,14 @@ void HolecAlg (int n, double* A, double* b, double* x, double* ExtraMem) {
       for (int k = 0; k < j; k++){
         sum += ExtraMem[i*n + k] * ExtraMem[j*n + k];
       }
-      if (i == j)
+      if (i == j) {
         ExtraMem[i*n + j] = sqrt(fabs(A[i*n + i] - sum));
-      else
+      }
+      else {
+        if (fabs(ExtraMem[j*n + j]) < std::numeric_limits<double>::epsilon())
+          return -1; // Матрица вырождена
         ExtraMem[i*n + j] = (1.0 / ExtraMem[j*n + j] * (A[i*n + j] - sum));
+      }
     }
   }
    //PrintMat(ExtraMem,n,n,n);
@@ -58,6 +62,7 @@ void HolecAlg (int n, double* A, double* b, double* x, double* ExtraMem) {
   }
   // PrintMat(x, n, 1, n);
   // printf("\n");
+  return 0;
 }
 
 

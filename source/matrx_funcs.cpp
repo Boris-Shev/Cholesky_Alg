@@ -76,3 +76,14 @@ double Residual (double* A, int n, double* b, double* x) {
   }
   return std::sqrt(std::fabs(norm_num)) / std::sqrt(std::fabs(norm_b));
 }
+
+double Inaccuracy (double* x, int size) {
+  double sum = 0;
+  for (int i = 0; i < size; i += 2) {
+    sum += (x[i] - 1) * (x[i] - 1);
+  }
+  for (int i = 1; i < size; i += 2) {
+    sum += x[i] * x[i];
+  }
+  return std::sqrt(std::fabs(sum));
+}

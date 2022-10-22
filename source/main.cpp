@@ -1,15 +1,28 @@
 #include "header.hpp"
 
 int main(int argc, char* argv[]) {
-  int err;
-  argc = argc;
-
+  if (argc < 4) {
+    printf("Недостаточное количество аргументов\n");
+    return -1;
+  }
+  for (int i = 1; i < 4; i++) {
+    std::string s(argv[i]);
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it)) ++it;
+    if (!(!s.empty() && it == s.end())) {
+          printf("Некорректные аргументы\n");
+          return -2;
+    }
+  }
   int n = std::stoi(argv[1]);
   int m = std::stoi(argv[2]);
   int k = std::stoi(argv[3]);
-  m=m;
+  if (n <= 0) {
+    printf("Некорректный размер матрицы\n");
+    return -3;
+  }
   double* matrx = new double[n*n];
-
+  int err;
   if (k == 0)
     err = InMat(n, k, matrx, argv[4]);
   else
@@ -18,19 +31,19 @@ int main(int argc, char* argv[]) {
     case -1:
       std::cout << "Ошибка открытия файла" << std::endl;
       delete[] matrx;
-      return err;
+      return -4;
     case -2:
       std::cout << "Неверный формат данных" << std::endl;
       delete[] matrx;
-      return err;
+      return -5;
     case -3:
       std::cout << "Ошибка ввода-вывода при чтении" << std::endl;
       delete[] matrx;
-      return err;
+      return -6;
     case -4:
       std::cout << "Недостаточное количество элементов" << std::endl;
       delete[] matrx;
-      return err;
+      return -7;
     default:
       break;
   }
@@ -45,12 +58,22 @@ int main(int argc, char* argv[]) {
   }
   double* extra_mem = new double[n*n];
 
-  int time = clock();
-  HolecAlg (n, matrx, b, x, extra_mem);
-  time = clock() - time;
+  err = 0;
+  double time = (double)clock();
+  err = HolecAlg (n, matrx, b, x, extra_mem);
+  time = (double)(clock() - time) / CLOCKS_PER_SEC;
+  if (err == -1) {
+    printf("Матрица вырождена или некорректна\n");
+    delete[] matrx;
+    delete[] b;
+    delete[] x;
+    delete[] extra_mem;
+    return -8;
+  }
   PrintMat(x, n, 1, m);
-  printf("Время алгоритма: %d\n", time);
+  printf("Время алгоритма: %.3lf\n", time);
   printf("Норма невязки: %lf\n", Residual(matrx, n, b, x));
+  printf("Норма погрешности: %lf\n", Inaccuracy(x, n));
 
   delete[] matrx;
   delete[] b;
