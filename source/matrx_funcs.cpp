@@ -58,6 +58,10 @@ void PrintMat (double* matrx, int numRow, int numCol, int limiter) {
   }
 }
 
+void PrintMat (double* matrx, int numRow, int numCol) {
+  PrintMat(matrx, numRow, numCol, std::max(numCol, numRow));
+}
+
 double Residual (double* A, int n, double* b, double* x) {
   double norm_b = 0;
   double norm_num = 0;

@@ -70,6 +70,14 @@ int main(int argc, char* argv[]) {
     delete[] extra_mem;
     return -8;
   }
+  if (err == -2) {
+    printf("Матрица не является положительно определенной\n");
+    delete[] matrx;
+    delete[] b;
+    delete[] x;
+    delete[] extra_mem;
+    return -9;
+  }
   PrintMat(x, n, 1, m);
   printf("Время алгоритма: %.3lf\n", time);
   printf("Норма невязки: %lf\n", Residual(matrx, n, b, x));

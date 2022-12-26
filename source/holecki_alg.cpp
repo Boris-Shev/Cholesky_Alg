@@ -11,6 +11,9 @@ int HolecAlg (int n, double* A, double* b, double* x, double* ExtraMem) {
         sum += ExtraMem[i*n + k] * ExtraMem[j*n + k];
       }
       if (i == j) {
+        if (A[i*n + i] - sum < 0)
+          return -2;
+
         ExtraMem[i*n + j] = sqrt(fabs(A[i*n + i] - sum));
       }
       else {
