@@ -100,40 +100,48 @@ M1:
   if (id == total_threads)
     right = n;
 
-  synchronize(total_threads);
 
   for (int i = left; i < right; i++) {
-    sum = 0;
-    for (int j = 0; j < n; j++) {
-      sum = sum + RR[j*n + i] * b[j];
-    }
-    x[i] = sum;
-  }
-  synchronize(total_threads);
-
-  if (id == 1) {
-    for (int i = 0; i < n; i++) {
-      x[i] = x[i] * d[i];
-      d[i] = x[i];
+    x[i] = 0;
+    for (int k = 0; k < n; k++) {
+      for (int q = 0; q < n; q++) {
+        x[i] += RR[i*n + k] * d[k] * RR[q*n + k] * b[q];
+      }
     }
   }
 
-  synchronize(total_threads);
-
-  for (int i = left; i < right; i++) {
-    sum = 0;
-    for (int j = 0; j < n; j++) {
-      sum = sum + RR[i*n + j] * d[j];
-    }
-    x[i] = sum;
-  }
-
-  synchronize(total_threads);
-  // if (id == 1) {
-  //   printf("\n" );
-  //   PrintMat(x,1,n);
-  //   printf("\n" );
+  // for (int i = left; i < right; i++) { // Начало рабочего куска
+  //   sum = 0;
+  //   for (int j = 0; j < n; j++) {
+  //     sum = sum + RR[j*n + i] * b[j];
+  //   }
+  //   x[i] = sum;
   // }
+  // synchronize(total_threads);
+  //
+  // if (id == 1) {
+  //   for (int i = 0; i < n; i++) {
+  //     x[i] = x[i] * d[i];
+  //     d[i] = x[i];
+  //   }
+  // }
+  //
+  // synchronize(total_threads);
+  //
+  // for (int i = left; i < right; i++) {
+  //   sum = 0;
+  //   for (int j = 0; j < n; j++) {
+  //     sum = sum + RR[i*n + j] * d[j];
+  //   }
+  //   x[i] = sum;
+  // }
+  //
+  // synchronize(total_threads); // Конец рабочего куска
+  // // if (id == 1) {
+  // //   printf("\n" );
+  // //   PrintMat(x,1,n);
+  // //   printf("\n" );
+  // // }
 
    return 0;
 }
