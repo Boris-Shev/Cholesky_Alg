@@ -1,30 +1,30 @@
 #include "header.hpp"
 
 int main(int argc, char* argv[]) {
-  if (argc < 4) {
-    printf("Недостаточное количество аргументов\n");
-    return -1;
+  // 1: размер матрицы; 2: количество выводимых значений матрицы
+  // 3: количество потоков; 4: номер формулы; 5: имя файла
+  int n, m, total_threads, k, err;
+  err = TestInitArg(argc, argv, &n, &m, &total_threads, &k);
+  switch (err) {
+    case -1:
+      printf("Недостаточное количество аргументов\n");
+      return -1;
+
+    case -2:
+      printf("Некорректные аргументы\n");
+      return -2;
+
+    default:
+      break;
   }
-  for (int i = 1; i < 4; i++) {
-    std::string s(argv[i]);
-    std::string::const_iterator it = s.begin();
-    while (it != s.end() && std::isdigit(*it)) ++it;
-    if (!(!s.empty() && it == s.end())) {
-          printf("Некорректные аргументы\n");
-          return -2;
-    }
-  }
-  int n = std::stoi(argv[1]);
-  int m = std::stoi(argv[2]);
-  int k = std::stoi(argv[3]);
+
   if (n <= 0) {
     printf("Некорректный размер матрицы\n");
     return -3;
   }
   double* matrx = new double[n*n];
-  int err;
   if (k == 0)
-    err = InMat(n, k, matrx, argv[4]);
+    err = InMat(n, k, matrx, argv[5]);
   else
     err = InMat(n, k, matrx, nullptr);
   switch (err) {
@@ -56,26 +56,70 @@ int main(int argc, char* argv[]) {
       sum += matrx[i*n + 2*j];
     b[i] = sum;
   }
-  double* extra_mem = new double[n*n];
+  double* extra_mem = new double[n*n*2 + n]; // (2*n + 1) X (n)
+  ARGS* args = new ARGS[total_threads];
+  pthread_t* threads = new pthread_t[total_threads];
+  for (int i = 0; i < total_threads; i++)
+	{
+		args[i].n = n;
+		args[i].A = matrx;
+    args[i].b = b;
+		args[i].x = x;
+		args[i].id = i + 1;
+    args[i].R = extra_mem;
+		args[i].total_threads = total_threads;
+    args[i].RR = extra_mem + n*n;
+    args[i].d = extra_mem + 2*n*n;
+	}
 
   err = 0;
-  double time = (double)clock();
-  err = HolecAlg (n, matrx, b, x, extra_mem);
-  time = (double)(clock() - time) / CLOCKS_PER_SEC;
+  double time = currentTime();
+  ////////////////////////////////////////////////////////////////
+  for (int i = 0; i < total_threads; i++)
+		if (pthread_create(threads + i, nullptr, HolecAlgParallel, args + i)) {
+			printf("Не получилось создать поток %d!\n", i);
+      delete[] matrx;
+      delete[] b;
+      delete[] x;
+      delete[] extra_mem;
+      delete[] args;
+      delete[] threads;
+
+			return -10;
+		}
+
+	for (int i = 0; i < total_threads; i++)
+		if (pthread_join(threads[i], nullptr)){
+			printf("Не получилось подождать поток %d!\n", i);
+      delete[] matrx;
+      delete[] b;
+      delete[] x;
+      delete[] extra_mem;
+      delete[] args;
+      delete[] threads;
+			return -11;
+		}
+  ////////////////////////////////////////////////////////////////
+  time = currentTime() - time;
+  err = args[0].err;
   if (err == -1) {
     printf("Матрица вырождена или некорректна\n");
     delete[] matrx;
     delete[] b;
     delete[] x;
     delete[] extra_mem;
+    delete[] args;
+    delete[] threads;
     return -8;
   }
   if (err == -2) {
-    printf("Матрица не является положительно определенной\n");
+    printf("Матрица не является положительно определенной\n"); // Исправить если останется время
     delete[] matrx;
     delete[] b;
     delete[] x;
     delete[] extra_mem;
+    delete[] args;
+    delete[] threads;
     return -9;
   }
   PrintMat(x, n, 1, m);
@@ -87,5 +131,7 @@ int main(int argc, char* argv[]) {
   delete[] b;
   delete[] x;
   delete[] extra_mem;
+  delete[] args;
+  delete[] threads;
   return 0;
 }

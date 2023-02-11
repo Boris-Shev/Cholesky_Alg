@@ -11,6 +11,8 @@ endif ()
 include_directories(${HOLEC_INCLUDE_DIRS})
 
 add_compile_options(
+      -pthread
+      -lgomp
       -mfpmath=sse
       -fstack-protector-all
       -g
@@ -41,6 +43,7 @@ add_executable(
   source/main.cpp
   source/matrx_funcs.cpp
   source/holecki_alg.cpp
+  source/synchronizer.cpp
 )
 
 target_link_libraries(holec_alg ${GEOMETRY_LIBS})

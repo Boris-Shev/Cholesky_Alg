@@ -1,5 +1,25 @@
 #include "header.hpp"
 
+int TestInitArg (int argc, char* argv[], int* n, int* m, int* p, int* k) {
+   if (argc < 5)
+     return -1;
+
+   for (int i = 1; i < 5; i++) {
+     std::string s(argv[i]);
+     std::string::const_iterator it = s.begin();
+
+     while (it != s.end() && std::isdigit(*it)) ++it;
+     if (!(!s.empty() && it == s.end()))
+       return -2;
+   }
+   *n = std::stoi(argv[1]);
+   *m = std::stoi(argv[2]);
+   *p = std::stoi(argv[3]);
+   *k = std::stoi(argv[4]);
+
+   return 0;
+}
+
 int InMat (int size, int formula, double* matrx, char* file) {
   if (formula == 0) {
     std::ifstream fin(file);
@@ -90,4 +110,10 @@ double Inaccuracy (double* x, int size) {
     sum += x[i] * x[i];
   }
   return std::sqrt(std::fabs(sum));
+}
+
+double currentTime() {
+    struct timeval time;
+    gettimeofday(&time, NULL);
+    return ((double)time.tv_sec * 1000000. + (double)time.tv_usec)/1000000.;
 }
