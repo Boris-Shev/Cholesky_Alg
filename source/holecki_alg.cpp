@@ -17,7 +17,6 @@ id=id;total_threads=total_threads;R=R;b=b;x=x;A=A;n=n;RR=RR;d=d;
 
   double sum;
   double eps = std::numeric_limits<double>::epsilon();
-  int err = 0;
   int left = (n*n / total_threads) * (id - 1);
   int right = (n*n / total_threads) * id;
   if (id == total_threads)
@@ -43,7 +42,7 @@ id=id;total_threads=total_threads;R=R;b=b;x=x;A=A;n=n;RR=RR;d=d;
 
     d[i] = Sgn(A[i*n + i] - sum);
     if(fabs(d[i]) < eps) {
-      err = -1;
+      d[0] = 0;
       goto M1;
     }
     R[i*n + i] = sqrt(fabs(A[i*n + i] - sum));
@@ -65,8 +64,8 @@ id=id;total_threads=total_threads;R=R;b=b;x=x;A=A;n=n;RR=RR;d=d;
   }
 M1:
   synchronize(total_threads);
-  if (err)
-    return err;
+  if (fabs(d[0]) < eps)
+    return -1;
   ////////////////////////////////////////////////////////
 
   for (int i = n - 1; i >= 0; i--) {

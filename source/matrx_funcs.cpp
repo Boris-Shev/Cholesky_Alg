@@ -17,6 +17,12 @@ int TestInitArg (int argc, char* argv[], int* n, int* m, int* p, int* k) {
    *p = std::stoi(argv[3]);
    *k = std::stoi(argv[4]);
 
+   if(*p <= 0)
+    return -2;
+
+   if(*k > 4 || *k < 0)
+    return -2;
+
    return 0;
 }
 
