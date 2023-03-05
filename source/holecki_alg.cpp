@@ -5,18 +5,20 @@ using namespace std;
 void* HolecAlgParallel(void* arg) {
   ARGS* args = (ARGS*)arg;
 
-  args[0].err = HolecAlg(args->n, args->id, args->total_threads,
-                      args->A, args->b, args->x, args->R, args->RR, args->d);
+  int n = args->n;
+  args->time = currentTime();
+  args->err = HolecAlg(args->n, args->id, args->total_threads,
+                      args->A, args->b, args->x, args->R, args->R + n*n, args->R + 2*n*n);
+  args->time = currentTime() - args->time;
 
   pthread_exit(nullptr);
 }
 
 int HolecAlg (int n, int id, int total_threads, double* A,
-              double* b, double* x, double* R, double* RR, double* d) { // В конце RR, d запихнуть в R
-id=id;total_threads=total_threads;R=R;b=b;x=x;A=A;n=n;RR=RR;d=d;
+              double* b, double* x, double* R, double* RR, double* d) {
 
   double sum;
-  double eps = std::numeric_limits<double>::epsilon();
+  double eps = 1e-12;
   int left = (n*n / total_threads) * (id - 1);
   int right = (n*n / total_threads) * id;
   if (id == total_threads)
@@ -40,11 +42,11 @@ id=id;total_threads=total_threads;R=R;b=b;x=x;A=A;n=n;RR=RR;d=d;
       sum += R[k*n + i] * R[k*n + i] * d[k];
     }
 
-    d[i] = Sgn(A[i*n + i] - sum);
-    if(fabs(d[i]) < eps) {
+    if (fabs(A[i*n + i] - sum) < eps){
       d[0] = 0;
       goto M1;
     }
+    d[i] = Sgn(A[i*n + i] - sum);
     R[i*n + i] = sqrt(fabs(A[i*n + i] - sum));
 
     for (int j = i + 1; j < n; j++) {

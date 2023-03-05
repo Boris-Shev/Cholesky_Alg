@@ -5,11 +5,15 @@ int TestInitArg (int argc, char* argv[], int* n, int* m, int* p, int* k) {
      return -1;
 
    for (int i = 1; i < 5; i++) {
+     int ind = 0;
      std::string s(argv[i]);
      std::string::const_iterator it = s.begin();
 
-     while (it != s.end() && std::isdigit(*it)) ++it;
-     if (!(!s.empty() && it == s.end()))
+     while (it != s.end() && std::isdigit(*it)) {
+       ++it;
+       ++ind;
+     }
+     if (!(!s.empty() && it == s.end()) || ind > 5)
        return -2;
    }
    *n = std::stoi(argv[1]);
@@ -23,6 +27,9 @@ int TestInitArg (int argc, char* argv[], int* n, int* m, int* p, int* k) {
    if(*k > 4 || *k < 0)
     return -2;
 
+   if (*m < 0)
+    return -2;
+
    return 0;
 }
 
@@ -32,12 +39,17 @@ int InMat (int size, int formula, double* matrx, char* file) {
     if(!fin.is_open()){ // Ошибка открытия файла
       return -1;
     }
-    int i;
-    for (i = 0; fin >> matrx[i] && i < size*size; i++) {}
+    int i = 0;
+    double tmp;
+    for (i = 0; fin >> tmp && i < size*size; i++)
+      matrx[i] = tmp;
+
     if (fin.eof() && i == size*size)
       {}
-    else if (fin.eof() && i != size*size) // Недостаточное количество элементов
-      return -4;
+    else if (i != size*size) // Недостаточное количество элементов
+      return -2;
+    else if (!fin.eof()) // Файл больше чем размерность матрицы
+      return -2;
     else if (fin.fail()) // Неверный формат данных
       return -2;
     else if (fin.bad()) // Ошибка ввода-вывода при чтении

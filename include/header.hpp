@@ -23,8 +23,7 @@ struct ARGS
 	int id;
 	int total_threads;
   int err = 0;
-  double* RR;
-  double* d;
+  double time = 0;
 };
 
 void synchronize(int total_threads);

@@ -11,6 +11,7 @@ endif ()
 include_directories(${HOLEC_INCLUDE_DIRS})
 
 add_compile_options(
+      -O3
       -pthread
       -lgomp
       -mfpmath=sse

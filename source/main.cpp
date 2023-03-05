@@ -18,10 +18,19 @@ int main(int argc, char* argv[]) {
       break;
   }
 
-  if (n <= 0) {
+  if (n <= 0 || n > 1e4) {
     printf("Некорректный размер матрицы\n");
     return -3;
   }
+  if (total_threads > n){
+    total_threads = n;
+    printf("Количество потоков изменено на размерность матрицы\n");
+  }
+  if (m > n){
+    m = n;
+    printf("Количество выводимых элементов изменено на размерность матрицы\n");
+  }
+/////////////////////////#Заполнение матрицы#////////////////////////////////
   double* matrx = new double[n*n];
   if (k == 0)
     err = InMat(n, k, matrx, argv[5]);
@@ -33,25 +42,44 @@ int main(int argc, char* argv[]) {
       delete[] matrx;
       return -4;
     case -2:
-      std::cout << "Неверный формат данных" << std::endl;
+      std::cout << "Неверный формат данных или неправильная размерность матрицы" << std::endl;
       delete[] matrx;
       return -5;
     case -3:
       std::cout << "Ошибка ввода-вывода при чтении" << std::endl;
       delete[] matrx;
       return -6;
-    case -4:
-      std::cout << "Недостаточное количество элементов" << std::endl;
-      delete[] matrx;
-      return -7;
     default:
       break;
   }
+//////////////////////#Проверка матрицы#///////////////////////////////
+  double eps = std::numeric_limits<double>::epsilon();
+  double sum = 0;
+  for (int i = 0; i < n; i++)
+    for (int j = i + 1; j < n; j++)
+      if (fabs(matrx[i*n + j] - matrx[j*n + i]) > eps) {
+        printf("Матрица не симметрична\n");
+        delete[] matrx;
+        return -1;
+      }
 
+  sum = 0;
+  for (int i = 0; i < n*n; i++){
+    sum += fabs(matrx[i]);
+  }
+  if(sum < 1e-30){
+    printf("Есть нулевые главные миноры или матрица некорректна\n");
+    delete[] matrx;
+    return -1;
+  } else {
+    for (int i = 0; i < n*n; i++)
+      matrx[i] = matrx[i] / sum;
+  }
+///////////////////////////#Подготовка#////////////////////////////////
   double* b = new double[n];
   double* x = new double[n];
   for (int i = 0; i < n; i++) {
-    double sum = 0;
+    sum = 0;
     for (int j = 0; j < (n + 1)/ 2; j++)
       sum += matrx[i*n + 2*j];
     b[i] = sum;
@@ -68,13 +96,11 @@ int main(int argc, char* argv[]) {
 		args[i].id = i + 1;
     args[i].R = extra_mem;
 		args[i].total_threads = total_threads;
-    args[i].RR = extra_mem + n*n;
-    args[i].d = extra_mem + 2*n*n;
 	}
 
   err = 0;
   double time = currentTime();
-  ////////////////////////////////////////////////////////////////
+  /////////////////////////////#Решение системы#///////////////////////////////
   for (int i = 0; i < total_threads; i++)
 		if (pthread_create(threads + i, nullptr, HolecAlgParallel, args + i)) {
 			printf("Не получилось создать поток %d!\n", i);
@@ -99,11 +125,11 @@ int main(int argc, char* argv[]) {
       delete[] threads;
 			return -11;
 		}
-  ////////////////////////////////////////////////////////////////
+  ///////////////////////////#Вывод результатов#///////////////////////////////
   time = currentTime() - time;
   err = args[0].err;
   if (err == -1) {
-    printf("Матрица вырождена или некорректна\n");
+    printf("Есть нулевые главные миноры или матрица некорректна\n");
     delete[] matrx;
     delete[] b;
     delete[] x;
@@ -112,20 +138,17 @@ int main(int argc, char* argv[]) {
     delete[] threads;
     return -8;
   }
-  if (err == -2) {
-    printf("Матрица не является положительно определенной\n"); // Исправить если останется время
-    delete[] matrx;
-    delete[] b;
-    delete[] x;
-    delete[] extra_mem;
-    delete[] args;
-    delete[] threads;
-    return -9;
-  }
+
+  double residual = Residual(matrx, n, b, x);
   PrintMat(x, n, 1, m);
   printf("Время алгоритма: %.3lf\n", time);
-  printf("Норма невязки: %lf\n", Residual(matrx, n, b, x));
+  // for (int i = 0; i < total_threads; i++)
+  //   printf("Время потока %d: %3lf\n", args[i].id, args[i].time);
+
+  printf("Норма невязки: %lf\n", residual);
   printf("Норма погрешности: %lf\n", Inaccuracy(x, n));
+  printf("%s : residual = %e elapsed = %.2f s = %d n = %d m = %d p = %d\n",
+        argv[0], residual, time, k, n, m, total_threads);
 
   delete[] matrx;
   delete[] b;
