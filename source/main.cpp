@@ -4,6 +4,7 @@ int main(int argc, char* argv[]) {
   // 1: размер матрицы; 2: количество выводимых значений матрицы
   // 3: количество потоков; 4: номер формулы; 5: имя файла
   int n, m, total_threads, k, err;
+  double time;
   err = TestInitArg(argc, argv, &n, &m, &total_threads, &k);
   switch (err) {
     case -1:
@@ -63,18 +64,18 @@ int main(int argc, char* argv[]) {
         return -1;
       }
 
-  sum = 0;
-  for (int i = 0; i < n*n; i++){
-    sum += fabs(matrx[i]);
-  }
-  if(sum < 1e-30){
-    printf("Есть нулевые главные миноры или матрица некорректна\n");
-    delete[] matrx;
-    return -1;
-  } else {
-    for (int i = 0; i < n*n; i++)
-      matrx[i] = matrx[i] / sum;
-  }
+  // sum = 0;
+  // for (int i = 0; i < n*n; i++){
+  //   sum += fabs(matrx[i]);
+  // }
+  // if(sum < 1e-30){
+  //   printf("Есть нулевые главные миноры или матрица некорректна\n");
+  //   delete[] matrx;
+  //   return -1;
+  // } else {
+  //   for (int i = 0; i < n*n; i++)
+  //     matrx[i] = matrx[i] / sum;
+  // }
 ///////////////////////////#Подготовка#////////////////////////////////
   double* b = new double[n];
   double* x = new double[n];
@@ -96,10 +97,11 @@ int main(int argc, char* argv[]) {
 		args[i].id = i + 1;
     args[i].R = extra_mem;
 		args[i].total_threads = total_threads;
+    args[i].time = &time;
 	}
 
   err = 0;
-  double time = currentTime();
+  time = currentTime();
   /////////////////////////////#Решение системы#///////////////////////////////
   for (int i = 0; i < total_threads; i++)
 		if (pthread_create(threads + i, nullptr, HolecAlgParallel, args + i)) {
@@ -140,6 +142,7 @@ int main(int argc, char* argv[]) {
   }
 
   double residual = Residual(matrx, n, b, x);
+  residual=residual;
   PrintMat(x, n, 1, m);
   printf("Время алгоритма: %.3lf\n", time);
   // for (int i = 0; i < total_threads; i++)
@@ -156,5 +159,10 @@ int main(int argc, char* argv[]) {
   delete[] extra_mem;
   delete[] args;
   delete[] threads;
-  return 0;
+/////////////////////////////////////////////////////////////
+  std::ofstream out(std::to_string(total_threads) + " time");
+  out << time;
+
+
+  return 122;
 }

@@ -1,0 +1,3 @@
+/home/student/work/newParllel_Alg/Final/build/CMakeFiles/holec_alg.dir
+/home/student/work/newParllel_Alg/Final/build/CMakeFiles/edit_cache.dir
+/home/student/work/newParllel_Alg/Final/build/CMakeFiles/rebuild_cache.dir

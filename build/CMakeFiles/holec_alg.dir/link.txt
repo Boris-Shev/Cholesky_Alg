@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/holec_alg.dir/source/main.cpp.o CMakeFiles/holec_alg.dir/source/matrx_funcs.cpp.o CMakeFiles/holec_alg.dir/source/holecki_alg.cpp.o CMakeFiles/holec_alg.dir/source/synchronizer.cpp.o -o holec_alg  -lpthread 

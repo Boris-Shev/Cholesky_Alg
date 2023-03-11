@@ -23,7 +23,7 @@ struct ARGS
 	int id;
 	int total_threads;
   int err = 0;
-  double time = 0;
+  double *time;
 };
 
 void synchronize(int total_threads);
@@ -34,7 +34,7 @@ void PrintMat (double* matrx, int numRow, int numCol, int limiter);
 void PrintMat (double* matrx, int numRow, int numCol);
 void* HolecAlgParallel(void* arg);
 int HolecAlg (int n, int id, int total_threads, double* A,
-              double* b, double* x, double* R, double* RR, double* d);
+              double* b, double* x, double* R, double* RR, double* d, double* time);
 template <typename T>
 int Sgn(T);
 double Residual (double* A, int n, double* b, double* x);
